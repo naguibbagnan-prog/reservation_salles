@@ -1,0 +1,26 @@
+# Environnement virtuel
+venv/
+env/
+.env/
+
+# Cache Python
+__pycache__/
+*.py[cod]
+*.so
+
+# Distribution
+dist/
+build/
+*.egg-info/
+
+# Editeur
+.vscode/
+.idea/
+
+# Base de données locale
+*.db
+*.sqlite3
+
+# Système
+.DS_Store
+Thumbs.db
