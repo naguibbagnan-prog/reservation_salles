@@ -130,8 +130,8 @@ class ReservationService:
         resas_jour.sort(key=lambda r: r.get_debut_minutes())
 
         creneaux = []
-        debut_journee = 8 * 60    # 08h00
-        fin_journee = 20 * 60    # 20h00
+        debut_journee = 7 * 60    # 07h00
+        fin_journee = 19 * 60    # 19h00
         position = debut_journee
 
         for resa in resas_jour:
