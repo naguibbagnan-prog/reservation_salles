@@ -92,9 +92,9 @@ class Reservation:
         if self._statut == "annulee" or autre.statut == "annulee":
             return False
         d1 = self.get_debut_minutes()
-        f1 = self._get_fin_minutes()
+        f1 = self.get_fin_minutes()
         d2 = autre.get_debut_minutes()
-        f2 = autre._get_fin_minutes()
+        f2 = autre.get_fin_minutes()
         return d1 < f2 and d2 < f1
 
     def __str__(self):
@@ -118,5 +118,6 @@ class Reservation:
             "heure_debut": self._heure_debut,
             "heure_fin": self._heure_fin,
             "motif": self._motif,
+            "statut": self._statut,
             "cree_le": self._cree_le
         }
