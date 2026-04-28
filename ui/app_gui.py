@@ -6,7 +6,7 @@ Utilise Tkinter avec des onglets (Notebook) pour organiser
 les differentes fonctionnalites.
 
 Auteurs : ACODODJA Melaine, BAGNAN Abdel-Naguib
-Encadre par : Dr MOUSSE
+
 """
 
 import tkinter as tk
@@ -42,10 +42,10 @@ class Application(tk.Tk):
     def _donnees_demo(self):
         """Ajoute quelques salles et utilisateurs pour tester."""
         salles = [
-            SalleCours("Solidarite R+1", 30, ["projecteur", "tableau"], "blanc"),
-            SalleCours("Solidarite R+2", 25, ["projecteur"], "interactif"),
-            SalleTP("Salle 13", 20, ["ordinateurs"], 18),
-            SalleTP("Salle 14", 24, ["ordinateurs"], 22),
+            SalleCours("Solidarite R+1", 200, ["projecteur", "tableau"], "blanc"),
+            SalleCours("Solidarite R+2", 180, ["projecteur"], "interactif"),
+            SalleTP("Salle 13", 120, ["ordinateurs"], 50),
+            SalleTP("Salle 14", 100, ["ordinateurs"], 55),
         ]
         for s in salles:
             self.service.ajouter_salle(s)
@@ -142,7 +142,7 @@ class Application(tk.Tk):
         ttk.Button(btns, text="Reserver", command=self._formulaire_reservation).pack(side=tk.LEFT, padx=5)
         ttk.Button(btns, text="Annuler", command=self._annuler_resa).pack(side=tk.LEFT, padx=5)
         ttk.Button(btns, text="Conflits ?", command=self._voir_conflits).pack(side=tk.LEFT, padx=5)
-
+        ttk.Button(btns, text="Rafraichir", command=self._maj_reservations).pack(side=tk.LEFT, padx=5)
         self._maj_reservations()
 
     def _onglet_planning(self):
@@ -274,6 +274,7 @@ class Application(tk.Tk):
         e_motif = ttk.Entry(fen, width=28)
         e_motif.pack()
 
+     
         def valider():
             sid = int(c_salle.get().split(" - ")[0])
             uid = int(c_user.get().split(" - ")[0])
@@ -290,14 +291,16 @@ class Application(tk.Tk):
             )
 
             if ok:
-                messagebox.showinfo("OK", "Reservation creee !")
-                self._maj_reservations()
-                self.statut.config(text="Reservation ajoutee.")
                 fen.destroy()
+                self._maj_reservations()
+                self.update()
+                messagebox.showinfo("OK", "Reservation creee !")
+                self.statut.config(text="Reservation ajoutee.")
             else:
                 messagebox.showerror("Conflit !", res)
 
         ttk.Button(fen, text="Reserver", command=valider).pack(pady=12)
+        
 
     def _annuler_resa(self):
         """Annule la reservation selectionnee."""
