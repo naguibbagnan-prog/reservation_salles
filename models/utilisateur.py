@@ -13,7 +13,7 @@ Auteurs : ACODODJA Melaine, BAGNAN Abdel-Naguib
 class Utilisateur:
     """Represente un utilisateur du systeme."""
 
-    ROLES = ("etudiant", "enseignant", "admin")
+    ROLES = ("Etudiant(e)", "Docteur", "Secretariat")
     _compteur = 0
 
     def __init__(self, nom, email, role="enseignant"):
