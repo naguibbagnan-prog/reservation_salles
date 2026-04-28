@@ -16,7 +16,7 @@ class Utilisateur:
     ROLES = ("Etudiant(e)", "Docteur", "Secretariat")
     _compteur = 0
 
-    def __init__(self, nom, email, role="enseignant"):
+    def __init__(self, nom, email, role="Docteur"):
         if role not in self.ROLES:
             raise ValueError(f"Role invalide. Choix possibles : {self.ROLES}")
 
