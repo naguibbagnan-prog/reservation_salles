@@ -52,6 +52,10 @@ class Reservation:
     @property
     def statut(self):
         return self._statut
+    
+    @property
+    def motif(self):
+        return self._motif
 
     @property
     def ressources(self):
