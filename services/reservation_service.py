@@ -158,11 +158,11 @@ class ReservationService:
         for i in range(len(actives)):
             for j in range(i + 1, len(actives)):
                 if actives[i].chevauche(actives[j]):
-                    conflits_truves.append((actives[i], actives[j]))
+                    conflits_trouves.append((actives[i], actives[j]))
 
         return {
             "total": len(self._reservations),
             "actives": len(actives),
-            "nb conflits": len(conflits_trouves),
+            "nb_conflits": len(conflits_trouves),
             "conflits": conflits_trouves
         }
