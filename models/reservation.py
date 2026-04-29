@@ -83,16 +83,17 @@ class Reservation:
     def chevauche(self, autre):
         """
         Verifie si cette reservation chevauche une autre.
-        Algorithme : 
-        Il y a chevauchement quand les duex conditions sont vraies
-          - debut1 < fin2
-          - debut2 < fin1
-        On verifie aussi que c'est la meme salle, la meme date, et qu'aucune des deux n'est annulee.
         """
+        # pas de conflit si l'une des salles est None
+        if self._salle is None or autre.salle is None:
+            return False
+        # pas de conflit si salle differente
         if self._salle.id != autre.salle.id:
             return False
+        # pas de conflit si date differente
         if self._date != autre.date:
             return False
+        # pas de conflit si l'une est annulee
         if self._statut == "annulee" or autre.statut == "annulee":
             return False
         d1 = self.get_debut_minutes()
