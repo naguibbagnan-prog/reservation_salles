@@ -35,12 +35,23 @@ class Application(tk.Tk):
         # charger des donnees de demo
         self._donnees_demo()
 
+        # charger les reservations depuis la base de donnees
+        self._charger_reservations()
+
         # construire l'interface
         self._menu()
         self._interface()
 
     def _donnees_demo(self):
         """Ajoute quelques salles et utilisateurs pour tester."""
+
+        from models.salle import Salle as S
+        from models.utilisateur import Utilisateur as U
+        from models.reservation import Reservation as R
+        S._compteur = 0
+        U._compteur = 0
+        R._compteur = 0    
+
         salles = [
             SalleCours("Solidarite R+1", 200, ["projecteur", "tableau"], "blanc"),
             SalleCours("Solidarite R+2", 180, ["projecteur"], "interactif"),
@@ -57,6 +68,22 @@ class Application(tk.Tk):
         ]
         for u in users:
             self.service.ajouter_utilisateur(u)
+
+    def _charger_reservations(self):
+        """Charge les reservations depuis la base de donnees."""
+        from models.reservation import Reservation
+        resas_db = self.db.lire_reservations()
+        for r in resas_db:
+            salle = self.service.trouver_salle(r["salle_id"])
+            user = self.service.trouver_utilisateur(r["utilisateur_id"])
+            if salle and user:
+                resa = Reservation(
+                    salle, user,
+                    r["date"], r["heure_debut"], r["heure_fin"],
+                    r["motif"]
+                )
+                resa._statut = r["statut"]
+                self.service._reservations.append(resa)
 
     def _menu(self):
         """Cree la barre de menu."""
@@ -82,10 +109,14 @@ class Application(tk.Tk):
         cadre.pack(fill=tk.BOTH, expand=True)
 
         # titre
-        ttk.Label(
-            cadre, text="Systeme de Reservation - Univ. Parakou",
-            font=("Helvetica", 16, "bold")
-        ).pack(pady=(0, 10))
+        tk.Label(
+            cadre, 
+            text="Systeme de Reservation - Univ. Parakou",
+            font=("Helvetica", 16, "bold"),
+            fg="white",
+            bg="#1a73e8",
+            pady=10
+        ).pack(fill=tk.X,pady=(0, 10))
 
         # onglets
         self.onglets = ttk.Notebook(cadre)
@@ -261,12 +292,12 @@ class Application(tk.Tk):
         # heures
         ttk.Label(fen, text="Heure debut (HH:MM) :").pack(pady=3)
         e_debut = ttk.Entry(fen, width=28)
-        e_debut.insert(0, "08:00")
+        e_debut.insert(0, "07:00")
         e_debut.pack()
 
         ttk.Label(fen, text="Heure fin (HH:MM) :").pack(pady=3)
         e_fin = ttk.Entry(fen, width=28)
-        e_fin.insert(0, "10:00")
+        e_fin.insert(0, "09:00")
         e_fin.pack()
 
         # motif
@@ -281,7 +312,7 @@ class Application(tk.Tk):
 
             salle = self.service.trouver_salle(sid)
             user = self.service.trouver_utilisateur(uid)
-
+            
             ok, res = self.service.creer_reservation(
                 salle, user,
                 e_date.get().strip(),
@@ -392,11 +423,13 @@ class Application(tk.Tk):
             self.tableau_resas.delete(item)
 
         for r in self.service.lister_reservations():
+            nom_salle = r.salle.nom if r.salle else "Inconnue"
+            nom_user = r.utilisateur.nom if r.utilisateur else "Inconnu"
             self.tableau_resas.insert("", tk.END, values=(
-                r.id, r.salle.nom, r.utilisateur.nom,
+                r.id, nom_salle, nom_user,
                 r.date, r.heure_debut, r.heure_fin,
                 r.motif, r.statut
-            ))
+        ))
 
 
 def lancer():
