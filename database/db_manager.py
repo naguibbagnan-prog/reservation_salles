@@ -135,7 +135,7 @@ class DatabaseManager:
     
     # --- Operations sur les reservations ---
 
-    def ajouter_reservation(self, salle_id, user_id, date, heure_debut, heure_fin, mptif, cree_le):
+    def ajouter_reservation(self, salle_id, user_id, date, heure_debut, heure_fin, motif, cree_le):
         conn = self._connecter()
         c = conn.cursor()
         c.execute(
