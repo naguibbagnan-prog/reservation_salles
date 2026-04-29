@@ -1,5 +1,5 @@
 """
-Sercice de gestion des reservations.
+Service de gestion des reservations.
 
 Ce module coordonne toutes les operations :
 - ajouter/supprimer des salles et utilisateurs
@@ -11,6 +11,8 @@ Auteurs : ACODODJA Melaine, BAGNAN Abdel-Naguib
 """
 
 from models.reservation import Reservation
+from database.db_manager import DatabaseManager
+
 
 class ReservationService:
     """Service central du systeme de reservation."""
@@ -20,6 +22,7 @@ class ReservationService:
         self._utilisateurs = []
         self._reservations = []
         self._ressources = []
+        self._db = DatabaseManager()
 
     # --- Salles ---
 
@@ -31,19 +34,19 @@ class ReservationService:
             if s.id == salle_id:
                 self._salles.pop(i)
                 return True
-            return False
+        return False
 
     def trouver_salle(self, salle_id):
         for s in self._salles:
             if s.id == salle_id:
                 return s
-            return None
+        return None
 
     def lister_salles(self):
         return self._salles.copy()
 
     # --- Utilisateurs ---
-    
+
     def ajouter_utilisateur(self, user):
         self._utilisateurs.append(user)
 
@@ -64,8 +67,10 @@ class ReservationService:
     def lister_ressources(self):
         return self._ressources.copy()
 
-    # ---Reservations ---
-    def creer_reservation(self, salle, utilisateur, date, heure_debut, heure_fin, motif=""):
+    # --- Reservations ---
+
+    def creer_reservation(self, salle, utilisateur, date,
+                          heure_debut, heure_fin, motif=""):
         """
         Cree une reservation apres verification des conflits.
         Retourne (True, reservation) ou (False, message d'erreur).
@@ -73,8 +78,7 @@ class ReservationService:
         nouvelle = Reservation(
             salle, utilisateur, date, heure_debut, heure_fin, motif
         )
-        
-        # verifier s'il y a des conflits
+
         conflits = self._detecter_conflits(nouvelle)
 
         if conflits:
@@ -83,18 +87,28 @@ class ReservationService:
             return (False, msg)
 
         self._reservations.append(nouvelle)
+
+        # sauvegarder dans la base de donnees
+        self._db.ajouter_reservation(
+            salle.id, utilisateur.id, date,
+            heure_debut, heure_fin, motif,
+            nouvelle._cree_le
+        )
+
         return (True, nouvelle)
 
     def annuler_reservation(self, resa_id):
         for r in self._reservations:
             if r.id == resa_id:
                 r.annuler()
+                self._db.changer_statut_reservation(resa_id, "annulee")
                 return True
         return False
 
     def lister_reservations(self, salle_id=None, date=None):
         """Liste les reservations avec les filtres optionnels."""
         resultats = self._reservations.copy()
+        resultats = [r for r in resultats if r.salle is not None]
 
         if salle_id is not None:
             resultats = [r for r in resultats if r.salle.id == salle_id]
@@ -106,10 +120,12 @@ class ReservationService:
     # --- Detection de conflits ---
 
     def _detecter_conflits(self, nouvelle_resa):
-        """Retourne la liste des reservations en conflit. """
+        """Retourne la liste des reservations en conflit."""
         conflits = []
         for resa in self._reservations:
             if resa.id == nouvelle_resa.id:
+                continue
+            if resa.salle is None or resa.utilisateur is None:
                 continue
             if nouvelle_resa.chevauche(resa):
                 conflits.append(resa)
@@ -120,18 +136,18 @@ class ReservationService:
         Cherche les creneaux disponibles pour une salle a une date.
         Retourne une liste de tuples (debut, fin).
         """
-        # recuperer les reservations du jour pour cette salle
         resas_jour = [
             r for r in self._reservations
-            if r.salle.id == salle.id
+            if r.salle is not None
+            and r.salle.id == salle.id
             and r.date == date
             and r.statut != "annulee"
         ]
         resas_jour.sort(key=lambda r: r.get_debut_minutes())
 
         creneaux = []
-        debut_journee = 7 * 60    # 07h00
-        fin_journee = 19 * 60    # 19h00
+        debut_journee = 7 * 60
+        fin_journee = 19 * 60
         position = debut_journee
 
         for resa in resas_jour:
@@ -139,10 +155,9 @@ class ReservationService:
             if debut_resa - position >= duree_min:
                 h1 = f"{position // 60:02d}:{position % 60:02d}"
                 h2 = f"{debut_resa // 60:02d}:{debut_resa % 60:02d}"
-                creneaux.append((h1,h2))
+                creneaux.append((h1, h2))
             position = max(position, resa.get_fin_minutes())
 
-        # verifier apres la derniere reservation
         if fin_journee - position >= duree_min:
             h1 = f"{position // 60:02d}:{position % 60:02d}"
             h2 = f"{fin_journee // 60:02d}:{fin_journee % 60:02d}"
@@ -151,7 +166,7 @@ class ReservationService:
         return creneaux
 
     def rapport_conflits(self):
-        """Genere un rapport sur les confits exixtants."""
+        """Genere un rapport sur les conflits existants."""
         actives = [r for r in self._reservations if r.statut != "annulee"]
         conflits_trouves = []
 
