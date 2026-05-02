@@ -165,7 +165,7 @@ class DatabaseManager:
     
     def changer_statut_reservation(self, resa_id, statut):
         conn = self._connecter()
-        c = conn.connecter()
+        c = conn.cursor()
         c.execute(
             "UPDATE reservations SET statut = ? WHERE id = ?",
             (statut, resa_id)
