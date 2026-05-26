@@ -111,7 +111,7 @@ class Application(tk.Tk):
         # titre
         tk.Label(
             cadre, 
-            text="Système de Réservation - Université de Parakou",
+            text="Système de Réservation de Salles - Université de Parakou",
             font=("Helvetica", 16, "bold"),
             fg="white",
             bg="#1a73e8",
