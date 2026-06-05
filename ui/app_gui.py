@@ -224,6 +224,9 @@ class Application(tk.Tk):
             nom = e_nom.get().strip()
             try:
                 cap = int(e_cap.get().strip())
+                if cap <= 0:
+                    messagebox.showerror("Erreur", "La capacite doit etre positive")
+                    return
             except ValueError:
                 messagebox.showerror("Erreur", "Capacite invalide")
                 return
